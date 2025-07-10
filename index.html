@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Haleem Quiz Hub!</title>
+    
+    <style>
+        /* CSS STYLES (No changes from before) */
+        *, *::before, *::after { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root { --hue-neutral: 200; --hue-wrong: 0; --hue-correct: 145; }
+
+        body { padding: 0; margin: 0; background: linear-gradient(-45deg, #4e54c8, #8f94fb, white); overflow-x: hidden; }
+        .bg-circles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; }
+        .bg-circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2); animation: animate-circles 25s linear infinite; bottom: -150px; }
+        .bg-circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; } .bg-circles li:nth-child(2){ left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; } .bg-circles li:nth-child(3){ left: 70%; width: 20px; height: 20px; animation-delay: 4s; } .bg-circles li:nth-child(4){ left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; } .bg-circles li:nth-child(5){ left: 65%; width: 20px; height: 20px; animation-delay: 0s; } .bg-circles li:nth-child(6){ left: 75%; width: 110px; height: 110px; animation-delay: 3s; } .bg-circles li:nth-child(7){ left: 35%; width: 150px; height: 150px; animation-delay: 7s; } .bg-circles li:nth-child(8){ left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; } .bg-circles li:nth-child(9){ left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; } .bg-circles li:nth-child(10){ left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+        @keyframes animate-circles { 0%{ transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; } 100%{ transform: translateY(-120vh) rotate(720deg); opacity: 0; border-radius: 50%; } }
+
+        .page-center { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .app-container { width: 800px; max-width: 95%;  background: linear-gradient(rgb(113, 113, 226), white); border-radius: 10px; padding: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); position: relative; z-index: 1; }
+        .page-content { animation: fadeIn 0.5s ease-in-out; text-align: center; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .page-content h1 { font-size: 3rem; margin-bottom: 10px; } .page-content h2 { font-size: 1.8rem; } .page-content p { font-size: 1.2rem; color: #555; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+        .form-group { margin-bottom: 15px; text-align: left; } .form-group label { display: block; margin-bottom: 5px; font-weight: bold; } .form-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 1.1rem; }
+        .disclaimer { font-size: 0.8rem; color: #777; margin-top: 15px; }
+
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; } 
+        .premium-category::after { content: ' 🌟'; color: gold; }
+        
+        .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 1.2rem; font-weight: bold; }
+        #timer { background-color: #4e54c8; color: white; padding: 5px 15px; border-radius: 20px; }
+        #progress-bar-container { width: 100%; background-color: #eee; border-radius: 5px; margin-bottom: 1rem; } #progress-bar { height: 10px; width: 0%; background-color: #8f94fb; border-radius: 5px; transition: width 0.3s ease; }
+        #question { font-size: 1.5rem; font-weight: bold; text-align: center; }
+        .btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin: 20px 0; }
+        .results-details { font-size: 1.5rem; text-align: center; margin: 20px 0; } .high-score { color: #d9a400; font-weight: bold; }
+        #encouragement-message { font-size: 1.3rem; font-style: italic; color: #333; margin: 20px; text-align: center; }
+        .controls { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+        .btn { --hue: var(--hue-neutral); border: 2px solid hsl(var(--hue), 100%, 30%); background-color: hsl(var(--hue), 100%, 90%); border-radius: 5px; padding: 10px 20px; font-size: 1.1rem; color: hsl(var(--hue), 100%, 20%); outline: none; cursor: pointer; transition: transform 0.1s; }
+        .btn:hover:not([disabled]) { border-color: black; transform: scale(1.02); } .btn:disabled { cursor: not-allowed; opacity: 0.7; }
+        .btn.correct { --hue: var(--hue-correct); color: white; background-color: hsl(var(--hue), 80%, 40%); border-color: hsl(var(--hue), 80%, 30%); } .btn.wrong { --hue: var(--hue-wrong); color: white; background-color: hsl(var(--hue), 80%, 50%); border-color: hsl(var(--hue), 80%, 40%); }
+        .hide { display: none; }
+    </style>
+</head>
+<body>
+    <ul class="bg-circles"><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>
+    <div class="page-center">
+        <div class="app-container">
+            <!-- 1. LANDING PAGE -->
+            <div id="landing-page" class="page-content">
+                <h1>Welcome to Haleem Educational Quiz Hub</h1>
+                <p>Embark on a learning journey! Start with foundational knowledge and advance through educational levels. Each stage offers a mix of subjects to challenge and expand your mind. Ready to begin?</p>
+                <button id="goto-login-btn" class="btn">Start Your Journey</button>
+            </div>
+
+            <!-- 2. LOGIN PAGE -->
+            <div id="login-page" class="page-content hide">
+                <h2>Create Your Player Profile</h2>
+                <form id="login-form">
+                    <div class="form-group"><label for="username">Enter Your First Name:</label><input type="text" id="username" required></div>
+                    <button type="submit" class="btn">Login & Notify</button>
+                    <p class="disclaimer">You will be prompted to send a pre-filled WhatsApp message to the admin.</p>
+                </form>
+            </div>
+
+            <!-- 3. WELCOME SCREEN -->
+            <div id="welcome-screen" class="page-content hide">
+                <h1 id="welcome-greeting">Hello, World!</h1>
+                <p>Choose your starting level below, or subscribe to unlock specialized topic quizzes!</p>
+                <button id="enter-quiz-btn" class="btn">Enter the Hub</button>
+            </div>
+            
+            <!-- 4. CATEGORY SELECTION -->
+            <div id="category-selection" class="page-content hide">
+                <h2>Educational Levels (20 Questions Each)</h2>
+                <div class="category-grid">
+                    <button class="btn category-btn" data-category="kindergarten">Kindergarten</button>
+                    <button class="btn category-btn" data-category="primary">Primary School</button>
+                    <button class="btn category-btn" data-category="secondary">Secondary School</button>
+                    <button class="btn category-btn" data-category="seniorSecondary">Senior Secondary</button>
+                    <button class="btn category-btn" data-category="higherEducation">Higher Education</button>
+                </div>
+                <hr style="margin: 30px 0;">
+                <h2>Premium Topics (10 Questions Each)</h2>
+                <div class="category-grid">
+                    <button class="btn category-btn premium-category hide" data-category="religion">Religion 🌟</button>
+                    <button class="btn category-btn premium-category hide" data-category="plants">Plants 🌟</button>
+                    <button class="btn category-btn premium-category hide" data-category="art">Art 🌟</button>
+                    <button class="btn category-btn premium-category hide" data-category="science">Science 🌟</button>
+                    <button class="btn category-btn premium-category hide" data-category="senseOrgans">Sense Organs 🌟</button>
+                    <button class="btn category-btn premium-category hide" data-category="continents">Continents 🌟</button>
+                    <button class="btn category-btn premium-category hide" data-category="oceans">Oceans 🌟</button>
+                    <button class="btn category-btn premium-category hide" data-category="generalMix">General Mix 🌟</button>
+                </div>
+            </div>
+
+            <!-- 5. QUESTION & 6. RESULTS SCREENS -->
+            <div id="question-container" class="page-content hide">
+                <div id="progress-bar-container"><div id="progress-bar"></div></div>
+                <div class="question-header"><span id="question-counter"></span><span id="timer">15</span></div>
+                <div id="question">Question Text</div><div id="answer-buttons" class="btn-grid"></div>
+                <div class="controls"><button id="back-btn" class="btn">Quit Game</button></div>
+            </div>
+            <div id="results-container" class="page-content hide">
+                <h2>Quiz Complete!</h2><div id="score-text" class="results-details"></div>
+                <div id="high-score-text" class="results-details high-score"></div><div id="encouragement-message"></div>
+                <div class="controls"><button id="play-again-btn" class="btn">Play Again</button><button id="subscribe-btn" class="btn">Subscribe to Unlock!</button></div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="correct-sound" src="data:audio/mpeg;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU Rocka_C4_Simple_Chime_3.wav"></audio>
+    <audio id="wrong-sound" src="data:audio/mpeg;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU Rocka_C4_Simple_Chime_3.wav"></audio>
+
+    <!-- THE COMPLETE JAVASCRIPT LOGIC -->
+    <script>
+        // --- ELEMENT REFERENCES ---
+        const allScreens = document.querySelectorAll('.page-content');
+        const landingPage = document.getElementById('landing-page'); const loginPage = document.getElementById('login-page'); const welcomeScreen = document.getElementById('welcome-screen'); const categorySelectionContainer = document.getElementById('category-selection'); const questionContainerElement = document.getElementById('question-container'); const resultsContainer = document.getElementById('results-container');
+        const gotoLoginBtn = document.getElementById('goto-login-btn'); const loginForm = document.getElementById('login-form'); const usernameInput = document.getElementById('username'); const welcomeGreeting = document.getElementById('welcome-greeting'); const enterQuizBtn = document.getElementById('enter-quiz-btn'); const questionElement = document.getElementById('question'); const answerButtonsElement = document.getElementById('answer-buttons'); const backButton = document.getElementById('back-btn'); const playAgainButton = document.getElementById('play-again-btn'); const questionCounterText = document.getElementById('question-counter'); const progressBar = document.getElementById('progress-bar'); const timerElement = document.getElementById('timer'); const scoreText = document.getElementById('score-text'); const highScoreText = document.getElementById('high-score-text'); const encouragementMessage = document.getElementById('encouragement-message'); const correctSound = document.getElementById('correct-sound'); const wrongSound = document.getElementById('wrong-sound'); const subscribeButton = document.getElementById('subscribe-btn');
+        let currentQuestions = [], currentQuestionIndex = 0, score = 0, timerInterval;
+
+        // --- THE COMPLETE QUESTION BANK ---
+        const allQuestions = {
+            // == EDUCATIONAL LEVELS (20 Questions Each) ==
+            kindergarten: [
+                { question: 'What color is a banana?', answers: [{ text: 'Yellow', correct: true }, { text: 'Blue', correct: false }] },
+                { question: 'What sound does a cow make?', answers: [{ text: 'Moo', correct: true }, { text: 'Oink', correct: false }] },
+                { question: 'How many wheels are on a bicycle?', answers: [{ text: 'Two', correct: true }, { text: 'Four', correct: false }] },
+                { question: 'Which shape has three sides?', answers: [{ text: 'Triangle', correct: true }, { text: 'Square', correct: false }] },
+                { question: 'What do you use to write on paper?', answers: [{ text: 'Pencil', correct: true }, { text: 'Spoon', correct: false }] },
+                { question: 'What color is the sky on a sunny day?', answers: [{ text: 'Blue', correct: true }, { text: 'Green', correct: false }] },
+                { question: 'Which animal says "quack"?', answers: [{ text: 'Duck', correct: true }, { text: 'Dog', correct: false }] },
+                { question: 'What is 2 + 2?', answers: [{ text: '4', correct: true }, { text: '5', correct: false }] },
+                { question: 'Which of these is a fruit?', answers: [{ text: 'Apple', correct: true }, { text: 'Carrot', correct: false }] },
+                { question: 'What do we wear on our feet?', answers: [{ text: 'Shoes', correct: true }, { text: 'Hats', correct: false }] },
+                { question: 'What is the opposite of "hot"?', answers: [{ text: 'Cold', correct: true }, { text: 'Warm', correct: false }] },
+                { question: 'How many fingers are on one hand?', answers: [{ text: 'Five', correct: true }, { text: 'Ten', correct: false }] },
+                { question: 'What letter comes after "A"?', answers: [{ text: 'B', correct: true }, { text: 'C', correct: false }] },
+                { question: 'Which animal is very tall and has a long neck?', answers: [{ text: 'Giraffe', correct: true }, { text: 'Mouse', correct: false }] },
+                { question: 'What do we sleep in?', answers: [{ text: 'Bed', correct: true }, { text: 'Chair', correct: false }] },
+                { question: 'What color is grass?', answers: [{ text: 'Green', correct: true }, { text: 'Purple', correct: false }] },
+                { question: 'What is the opposite of "big"?', answers: [{ text: 'Small', correct: true }, { text: 'Large', correct: false }] },
+                { question: 'What sound does a cat make?', answers: [{ text: 'Meow', correct: true }, { text: 'Woof', correct: false }] },
+                { question: 'What do we drink when we are thirsty?', answers: [{ text: 'Water', correct: true }, { text: 'Bread', correct: false }] },
+                { question: 'What shape is a door?', answers: [{ text: 'Rectangle', correct: true }, { text: 'Circle', correct: false }] },
+            ],
+            primary: [
+                { question: 'What is 7 multiplied by 3?', answers: [{ text: '21', correct: true }, { text: '24', correct: false }] },
+                { question: 'What is the capital of France?', answers: [{ text: 'Paris', correct: true }, { text: 'London', correct: false }] },
+                { question: 'What do bees make?', answers: [{ text: 'Honey', correct: true }, { text: 'Milk', correct: false }] },
+                { question: 'How many days are in a year?', answers: [{ text: '365', correct: true }, { text: '356', correct: false }] },
+                { question: 'Which planet is known as the Red Planet?', answers: [{ text: 'Mars', correct: true }, { text: 'Venus', correct: false }] },
+                { question: 'What is the name for a baby dog?', answers: [{ text: 'Puppy', correct: true }, { text: 'Kitten', correct: false }] },
+                { question: 'Who was the first person to walk on the Moon?', answers: [{ text: 'Neil Armstrong', correct: true }, { text: 'Buzz Aldrin', correct: false }] },
+                { question: 'What gas do plants breathe in?', answers: [{ text: 'Carbon Dioxide', correct: true }, { text: 'Oxygen', correct: false }] },
+                { question: 'How many continents are there?', answers: [{ text: '7', correct: true }, { text: '6', correct: false }] },
+                { question: 'What is the main color of a polar bear?', answers: [{ text: 'White', correct: true }, { text: 'Black', correct: false }] },
+                { question: 'What is the past tense of "run"?', answers: [{ text: 'Ran', correct: true }, { text: 'Runned', correct: false }] },
+                { question: 'What is the largest mammal in the world?', answers: [{ text: 'Blue Whale', correct: true }, { text: 'Elephant', correct: false }] },
+                { question: 'Which ocean is the largest?', answers: [{ text: 'Pacific', correct: true }, { text: 'Atlantic', correct: false }] },
+                { question: 'What is a triangle?', answers: [{ text: 'A shape with 3 sides', correct: true }, { text: 'A shape with 4 sides', correct: false }] },
+                { question: 'Who invented the light bulb?', answers: [{ text: 'Thomas Edison', correct: true }, { text: 'Alexander Graham Bell', correct: false }] },
+                { question: 'What is the currency of the United States?', answers: [{ text: 'Dollar', correct: true }, { text: 'Euro', correct: false }] },
+                { question: 'What is a verb?', answers: [{ text: 'An action word', correct: true }, { text: 'A naming word', correct: false }] },
+                { question: 'What is the main ingredient in bread?', answers: [{ text: 'Flour', correct: true }, { text: 'Sugar', correct: false }] },
+                { question: 'How many hours are in a day?', answers: [{ text: '24', correct: true }, { text: '25', correct: false }] },
+                { question: 'What is the freezing point of water?', answers: [{ text: '0° Celsius', correct: true }, { text: '100° Celsius', correct: false }] },
+            ],
+            secondary: [
+                { question: 'What is the chemical symbol for Gold?', answers: [{ text: 'Au', correct: true }, { text: 'Ag', correct: false }] },
+                { question: 'Who wrote "The Adventures of Tom Sawyer"?', answers: [{ text: 'Mark Twain', correct: true }, { text: 'J.K. Rowling', correct: false }] },
+                { question: 'What is the powerhouse of the cell?', answers: [{ text: 'Mitochondria', correct: true }, { text: 'Nucleus', correct: false }] },
+                { question: 'What is the square root of 81?', answers: [{ text: '9', correct: true }, { text: '8', correct: false }] },
+                { question: 'What type of government does the United States have?', answers: [{ text: 'A Democratic Republic', correct: true }, { text: 'A Monarchy', correct: false }] },
+                { question: 'What is photosynthesis?', answers: [{ text: 'Process plants use to make food', correct: true }, { text: 'Process of animal digestion', correct: false }] },
+                { question: 'What is the largest desert in the world?', answers: [{ text: 'Antarctic Polar Desert', correct: true }, { text: 'Sahara Desert', correct: false }] },
+                { question: 'Who discovered penicillin?', answers: [{ text: 'Alexander Fleming', correct: true }, { text: 'Marie Curie', correct: false }] },
+                { question: 'What is the formula for the area of a circle?', answers: [{ text: 'πr²', correct: true }, { text: '2πr', correct: false }] },
+                { question: 'In which country are the pyramids of Giza located?', answers: [{ text: 'Egypt', correct: true }, { text: 'Mexico', correct: false }] },
+                { question: 'What is the hardest natural substance on Earth?', answers: [{ text: 'Diamond', correct: true }, { text: 'Gold', correct: false }] },
+                { question: 'What causes the tides?', answers: [{ text: 'The Moon\'s gravity', correct: true }, { text: 'The Earth\'s rotation', correct: false }] },
+                { question: 'What is the main gas that makes up the Earth\'s atmosphere?', answers: [{ text: 'Nitrogen', correct: true }, { text: 'Oxygen', correct: false }] },
+                { question: 'Who was the first woman to fly solo across the Atlantic Ocean?', answers: [{ text: 'Amelia Earhart', correct: true }, { text: 'Bessie Coleman', correct: false }] },
+                { question: 'What is the longest river in the world?', answers: [{ text: 'The Nile', correct: true }, { text: 'The Amazon', correct: false }] },
+                { question: 'What is an "isotope"?', answers: [{ text: 'An atom with a different number of neutrons', correct: true }, { text: 'An atom with a different number of protons', correct: false }] },
+                { question: 'What is the capital of Australia?', answers: [{ text: 'Canberra', correct: true }, { text: 'Sydney', correct: false }] },
+                { question: 'In Greek mythology, who was the king of the gods?', answers: [{ text: 'Zeus', correct: true }, { text: 'Hades', correct: false }] },
+                { question: 'What is a "prime number"?', answers: [{ text: 'A number divisible only by 1 and itself', correct: true }, { text: 'An even number', correct: false }] },
+                { question: 'What year did World War II end?', answers: [{ text: '1945', correct: true }, { text: '1918', correct: false }] },
+            ],
+            seniorSecondary: [
+                { question: 'What is the first law of thermodynamics?', answers: [{ text: 'Energy cannot be created or destroyed', correct: true }, { text: 'For every action, there is an equal and opposite reaction', correct: false }] },
+                { question: 'In chemistry, what is a "mole"?', answers: [{ text: 'A unit of measurement for substance amount', correct: true }, { text: 'A type of chemical bond', correct: false }] },
+                { question: 'Who wrote the novel "1984"?', answers: [{ text: 'George Orwell', correct: true }, { text: 'Aldous Huxley', correct: false }] },
+                { question: 'What is the primary function of the Krebs cycle?', answers: [{ text: 'To generate energy through oxidation', correct: true }, { text: 'To build proteins', correct: false }] },
+                { question: 'What historical period is known as the "Renaissance"?', answers: [{ text: 'A "rebirth" of art and learning in Europe', correct: true }, { text: 'The age of industrial invention', correct: false }] },
+                { question: 'What is the "Doppler effect"?', answers: [{ text: 'The change in frequency of a wave in relation to an observer', correct: true }, { text: 'The bending of light around an object', correct: false }] },
+                { question: 'What is the Pythagorean theorem?', answers: [{ text: 'a² + b² = c²', correct: true }, { text: 'E = mc²', correct: false }] },
+                { question: 'What is the role of the Federal Reserve in the US economy?', answers: [{ text: 'To manage the money supply and interest rates', correct: true }, { text: 'To print all physical currency', correct: false }] },
+                { question: 'What is the main theme of Shakespeare\'s "Macbeth"?', answers: [{ text: 'The corrupting nature of unchecked ambition', correct: true }, { text: 'The struggle for social justice', correct: false }] },
+                { question: 'In computer science, what is an "algorithm"?', answers: [{ text: 'A set of rules for solving a problem', correct: true }, { text: 'A piece of computer hardware', correct: false }] },
+                { question: 'What is the difference between a prokaryotic and eukaryotic cell?', answers: [{ text: 'Eukaryotic cells have a nucleus', correct: true }, { text: 'Prokaryotic cells are larger', correct: false }] },
+                { question: 'Who developed the theory of general relativity?', answers: [{ text: 'Albert Einstein', correct: true }, { text: 'Isaac Newton', correct: false }] },
+                { question: 'What is "Habeas Corpus"?', answers: [{ text: 'A law requiring a person under arrest to be brought before a judge', correct: true }, { text: 'The right to a speedy trial', correct: false }] },
+                { question: 'What is the literary device of "irony"?', answers: [{ text: 'A contrast between expectation and reality', correct: true }, { text: 'Giving human qualities to objects', correct: false }] },
+                { question: 'What event triggered the start of World War I?', answers: [{ text: 'The assassination of Archduke Franz Ferdinand', correct: true }, { text: 'The bombing of Pearl Harbor', correct: false }] },
+                { question: 'What is a "sonnet"?', answers: [{ text: 'A 14-line poem', correct: true }, { text: 'A type of novel', correct: false }] },
+                { question: 'What is the capital of Brazil?', answers: [{ text: 'Brasília', correct: true }, { text: 'Rio de Janeiro', correct: false }] },
+                { question: 'What is the function of DNA?', answers: [{ text: 'To carry genetic instructions', correct: true }, { text: 'To produce energy for the cell', correct: false }] },
+                { question: 'What is the pH of pure water?', answers: [{ text: '7 (Neutral)', correct: true }, { text: '0 (Acidic)', correct: false }] },
+                { question: 'In calculus, what does an "integral" represent?', answers: [{ text: 'The area under a curve', correct: true }, { text: 'The slope of a line', correct: false }] },
+            ],
+            higherEducation: [
+                { question: 'In macroeconomics, what does "GDP" stand for?', answers: [{ text: 'Gross Domestic Product', correct: true }, { text: 'Global Development Program', correct: false }] },
+                { question: 'Who is considered the father of modern psychoanalysis?', answers: [{ text: 'Sigmund Freud', correct: true }, { text: 'Carl Jung', correct: false }] },
+                { question: 'What is Occam\'s Razor?', answers: [{ text: 'The principle that the simplest explanation is usually the best', correct: true }, { text: 'A theory of parallel universes', correct: false }] },
+                { question: 'In computer networking, what is a "firewall"?', answers: [{ text: 'A security system that monitors and controls network traffic', correct: true }, { text: 'A device for boosting Wi-Fi signal', correct: false }] },
+                { question: 'What is the main argument in Plato\'s "Allegory of the Cave"?', answers: [{ text: 'The perceived world is not the real world', correct: true }, { text: 'All humans are inherently good', correct: false }] },
+                { question: 'What is a "black hole"?', answers: [{ text: 'A region of spacetime where gravity is so strong nothing can escape', correct: true }, { text: 'A star that has run out of fuel', correct: false }] },
+                { question: 'What is the "Heisenberg Uncertainty Principle"?', answers: [{ text: 'It\'s impossible to know both the position and momentum of a particle simultaneously', correct: true }, { text: 'The universe is constantly expanding', correct: false }] },
+                { question: 'In sociology, what is "social stratification"?', answers: [{ text: 'The hierarchical arrangement of individuals into social classes', correct: true }, { text: 'The study of social interactions', correct: false }] },
+                { question: 'What is the primary difference between quantitative and qualitative research?', answers: [{ text: 'Quantitative deals with numbers, Qualitative with descriptions', correct: true }, { text: 'Quantitative is more accurate', correct: false }] },
+                { question: 'What does "CPU" stand for?', answers: [{ text: 'Central Processing Unit', correct: true }, { text: 'Computer Personal Unit', correct: false }] },
+                { question: 'What is the significance of the "Enlightenment" period?', answers: [{ text: 'It emphasized reason, individualism, and skepticism', correct: true }, { text: 'It was a period of religious revival', correct: false }] },
+                { question: 'In law, what does "stare decisis" mean?', answers: [{ text: 'The principle of following legal precedent', correct: true }, { text: 'Guilty until proven innocent', correct: false }] },
+                { question: 'What is "Cognitive Dissonance" in psychology?', answers: [{ text: 'Mental discomfort from holding conflicting beliefs', correct: true }, { text: 'A type of memory loss', correct: false }] },
+                { question: 'What is the fundamental theorem of calculus?', answers: [{ text: 'It links differentiation and integration', correct: true }, { text: 'It proves the existence of irrational numbers', correct: false }] },
+                { question: 'What is the core principle of "Keynesian Economics"?', answers: [{ text: 'Government intervention can stabilize the economy', correct: true }, { text: 'Free markets regulate themselves', correct: false }] },
+                { question: 'What is CRISPR technology used for?', answers: [{ text: 'Gene editing', correct: true }, { text: 'Carbon dating', correct: false }] },
+                { question: 'What is "epistemology" in philosophy?', answers: [{ text: 'The theory of knowledge', correct: true }, { text: 'The study of ethics', correct: false }] },
+                { question: 'What is the main role of a catalyst in a chemical reaction?', answers: [{ text: 'To increase the rate of reaction without being consumed', correct: true }, { text: 'To be the primary reactant', correct: false }] },
+                { question: 'In literature, what is "postmodernism"?', answers: [{ text: 'A style characterized by irony, and skepticism toward grand narratives', correct: true }, { text: 'A style that follows strict rules of form', correct: false }] },
+                { question: 'What is the "Turing Test"?', answers: [{ text: 'A test of a machine\'s ability to exhibit intelligent behavior', correct: true }, { text: 'A test for computer processing speed', correct: false }] },
+            ],
+            // == PREMIUM TOPICS (10 Questions Each) ==
+            religion: [
+                { question: 'What is the holy book of Islam?', answers: [{ text: 'The Quran', correct: true }, { text: 'The Torah', correct: false }] },
+                { question: 'Who is the central figure in Buddhism?', answers: [{ text: 'Siddhartha Gautama', correct: true }, { text: 'The Dalai Lama', correct: false }] },
+                { question: 'What are the first five books of the Hebrew Bible called?', answers: [{ text: 'The Torah', correct: true }, { text: 'The Talmud', correct: false }] },
+                { question: 'In Hinduism, who is the "destroyer" god in the Trimurti?', answers: [{ text: 'Shiva', correct: true }, { text: 'Vishnu', correct: false }] },
+                { question: 'What is the largest religious group in the world?', answers: [{ text: 'Christianity', correct: true }, { text: 'Islam', correct: false }] },
+                { question: 'What is the sacred text of Sikhism?', answers: [{ text: 'The Guru Granth Sahib', correct: true }, { text: 'The Vedas', correct: false }] },
+                { question: 'The holiday of Ramadan is observed by which religion?', answers: [{ text: 'Islam', correct: true }, { text: 'Judaism', correct: false }] },
+                { question: 'What is the concept of "Nirvana" in Buddhism?', answers: [{ text: 'A state of enlightenment and freedom from suffering', correct: true }, { text: 'A paradise after death', correct: false }] },
+                { question: 'Who was the founder of Mormonism?', answers: [{ text: 'Joseph Smith', correct: true }, { text: 'Brigham Young', correct: false }] },
+                { question: 'The "Five Pillars" are a core belief of which faith?', answers: [{ text: 'Islam', correct: true }, { text: 'Sikhism', correct: false }] },
+            ],
+            plants: [
+                { question: 'What is the process by which plants make food using sunlight?', answers: [{ text: 'Photosynthesis', correct: true }, { text: 'Respiration', correct: false }] },
+                { question: 'What part of a plant absorbs water and nutrients from the soil?', answers: [{ text: 'Roots', correct: true }, { text: 'Leaves', correct: false }] },
+                { question: 'What is the green pigment in plant leaves called?', answers: [{ text: 'Chlorophyll', correct: true }, { text: 'Melanin', correct: false }] },
+                { question: 'Which part of a flower produces pollen?', answers: [{ text: 'The stamen', correct: true }, { text: 'The pistil', correct: false }] },
+                { question: 'What is the woody tissue in trees that transports water?', answers: [{ text: 'Xylem', correct: true }, { text: 'Phloem', correct: false }] },
+                { question: 'Which type of tree loses its leaves in the fall?', answers: [{ text: 'Deciduous', correct: true }, { text: 'Coniferous', correct: false }] },
+                { question: 'What is the sweet liquid produced by flowers to attract pollinators?', answers: [{ text: 'Nectar', correct: true }, { text: 'Sap', correct: false }] },
+                { question: 'From which plant does coffee originate?', answers: [{ text: 'The coffee plant (Coffea)', correct: true }, { text: 'The cacao tree', correct: false }] },
+                { question: 'What is a plant that lives for more than two years called?', answers: [{ text: 'Perennial', correct: true }, { text: 'Annual', correct: false }] },
+                { question: 'What is the study of plants called?', answers: [{ text: 'Botany', correct: true }, { text: 'Zoology', correct: false }] },
+            ],
+            art: [
+                { question: 'Who painted "The Starry Night"?', answers: [{ text: 'Vincent van Gogh', correct: true }, { text: 'Claude Monet', correct: false }] },
+                { question: 'Who sculpted the statue of "David"?', answers: [{ text: 'Michelangelo', correct: true }, { text: 'Donatello', correct: false }] },
+                { question: 'What art movement is characterized by dream-like, bizarre scenes?', answers: [{ text: 'Surrealism', correct: true }, { text: 'Impressionism', correct: false }] },
+                { question: 'Who is famous for his "Campbell\'s Soup Cans" artwork?', answers: [{ text: 'Andy Warhol', correct: true }, { text: 'Roy Lichtenstein', correct: false }] },
+                { question: 'What is the name of the famous painting by Edvard Munch depicting a horrified figure?', answers: [{ text: 'The Scream', correct: true }, { text: 'The Thinker', correct: false }] },
+                { question: 'Which art movement focused on capturing a momentary impression of a scene?', answers: [{ text: 'Impressionism', correct: true }, { text: 'Cubism', correct: false }] },
+                { question: 'Who painted the ceiling of the Sistine Chapel?', answers: [{ text: 'Michelangelo', correct: true }, { text: 'Leonardo da Vinci', correct: false }] },
+                { question: 'What style of art is Pablo Picasso most associated with?', answers: [{ text: 'Cubism', correct: true }, { text: 'Realism', correct: false }] },
+                { question: 'Which Dutch artist is known for his self-portraits and paintings of common people?', answers: [{ text: 'Rembrandt', correct: true }, { text: 'Vermeer', correct: false }] },
+                { question: 'What is a "fresco"?', answers: [{ text: 'A painting done on wet plaster', correct: true }, { text: 'A sculpture made of bronze', correct: false }] },
+            ],
+            science: [
+                { question: 'What is the atomic number of Carbon?', answers: [{ text: '6', correct: true }, { text: '12', correct: false }] },
+                { question: 'What force opposes motion between two surfaces in contact?', answers: [{ text: 'Friction', correct: true }, { text: 'Gravity', correct: false }] },
+                { question: 'What is the study of earthquakes called?', answers: [{ text: 'Seismology', correct: true }, { text: 'Meteorology', correct: false }] },
+                { question: 'What is the largest organ in the human body?', answers: [{ text: 'The skin', correct: true }, { text: 'The liver', correct: false }] },
+                { question: 'What type of star is the Sun?', answers: [{ text: 'A Yellow Dwarf', correct: true }, { text: 'A Red Giant', correct: false }] },
+                { question: 'What are the three states of matter?', answers: [{ text: 'Solid, Liquid, Gas', correct: true }, { text: 'Rock, Water, Air', correct: false }] },
+                { question: 'What part of an atom has a positive charge?', answers: [{ text: 'Proton', correct: true }, { text: 'Neutron', correct: false }] },
+                { question: 'How long does it take for Earth to orbit the Sun?', answers: [{ text: 'Approximately 365.25 days', correct: true }, { text: '30 days', correct: false }] },
+                { question: 'What is the scientific name for humans?', answers: [{ text: 'Homo sapiens', correct: true }, { text: 'Neanderthal', correct: false }] },
+                { question: 'What is the closest galaxy to the Milky Way?', answers: [{ text: 'Andromeda Galaxy', correct: true }, { text: 'Triangulum Galaxy', correct: false }] },
+            ],
+            senseOrgans: [
+                { question: 'Which organ is responsible for our sense of sight?', answers: [{ text: 'The Eye', correct: true }, { text: 'The Ear', correct: false }] },
+                { question: 'What are the tiny bumps on your tongue that help you taste?', answers: [{ text: 'Papillae', correct: true }, { text: 'Follicles', correct: false }] },
+                { question: 'Which part of the ear helps with balance?', answers: [{ text: 'The inner ear (semicircular canals)', correct: true }, { text: 'The eardrum', correct: false }] },
+                { question: 'The sense of smell is also known as what?', answers: [{ text: 'Olfaction', correct: true }, { text: 'Gustation', correct: false }] },
+                { question: 'What is the colored part of the eye called?', answers: [{ text: 'The Iris', correct: true }, { text: 'The Pupil', correct: false }] },
+                { question: 'What are the three small bones in the middle ear collectively called?', answers: [{ text: 'The Ossicles', correct: true }, { text: 'The Cochlea', correct: false }] },
+                { question: 'What is the largest sense organ?', answers: [{ text: 'The Skin', correct: true }, { text: 'The Nose', correct: false }] },
+                { question: 'Which sense is most closely linked to memory?', answers: [{ text: 'Smell', correct: true }, { text: 'Sight', correct: false }] },
+                { question: 'The retina is part of which sense organ?', answers: [{ text: 'The Eye', correct: true }, { text: 'The Tongue', correct: false }] },
+                { question: 'What are the five basic tastes?', answers: [{ text: 'Sweet, Sour, Salty, Bitter, Umami', correct: true }, { text: 'Spicy, Sweet, Sour, Salty, Bitter', correct: false }] },
+            ],
+            continents: [
+                { question: 'Which is the most populous continent?', answers: [{ text: 'Asia', correct: true }, { text: 'Africa', correct: false }] },
+                { question: 'Which continent is known as the "frozen continent"?', answers: [{ text: 'Antarctica', correct: true }, { text: 'Europe', correct: false }] },
+                { question: 'The Amazon Rainforest is primarily located on which continent?', answers: [{ text: 'South America', correct: true }, { text: 'Africa', correct: false }] },
+                { question: 'Which continent is also a single country?', answers: [{ text: 'Australia', correct: true }, { text: 'North America', correct: false }] },
+                { question: 'Through which two continents does the country of Egypt lie?', answers: [{ text: 'Africa and Asia', correct: true }, { text: 'Africa and Europe', correct: false }] },
+                { question: 'What is the smallest continent by land area?', answers: [{ text: 'Australia', correct: true }, { text: 'South America', correct: false }] },
+                { question: 'The Alps mountain range is found on which continent?', answers: [{ text: 'Europe', correct: true }, { text: 'Asia', correct: false }] },
+                { question: 'Which continent has the most countries?', answers: [{ text: 'Africa', correct: true }, { text: 'Asia', correct: false }] },
+                { question: 'The Sahara Desert is on which continent?', answers: [{ text: 'Africa', correct: true }, { text: 'Australia', correct: false }] },
+                { question: 'Which continent is the only one to lie in all four hemispheres?', answers: [{ text: 'Africa', correct: true }, { text: 'Asia', correct: false }] },
+            ],
+            oceans: [
+                { question: 'How many oceans are officially recognized in the world?', answers: [{ text: 'Five', correct: true }, { text: 'Four', correct: false }] },
+                { question: 'What is the deepest point in all of the world\'s oceans?', answers: [{ text: 'The Mariana Trench', correct: true }, { text: 'The Puerto Rico Trench', correct: false }] },
+                { question: 'Which is the smallest ocean?', answers: [{ text: 'The Arctic Ocean', correct: true }, { text: 'The Indian Ocean', correct: false }] },
+                { question: 'Which ocean surrounds Antarctica?', answers: [{ text: 'The Southern Ocean', correct: true }, { text: 'The South Pacific Ocean', correct: false }] },
+                { question: 'The Great Barrier Reef is located in which ocean?', answers: [{ text: 'The Pacific Ocean', correct: true }, { text: 'The Indian Ocean', correct: false }] },
+                { question: 'Which ocean separates Europe and Africa from the Americas?', answers: [{ text: 'The Atlantic Ocean', correct: true }, { text: 'The Pacific Ocean', correct: false }] },
+                { question: 'The term "Ring of Fire" is associated with which ocean?', answers: [{ text: 'The Pacific Ocean', correct: true }, { text: 'The Atlantic Ocean', correct: false }] },
+                { question: 'What is the warmest ocean in the world?', answers: [{ text: 'The Indian Ocean', correct: true }, { text: 'The Atlantic Ocean', correct: false }] },
+                { question: 'The Bermuda Triangle is located in which ocean?', answers: [{ text: 'The Atlantic Ocean', correct: true }, { text: 'The Pacific Ocean', correct: false }] },
+                { question: 'Which is the youngest of the world\'s oceans?', answers: [{ text: 'The Southern Ocean', correct: true }, { text: 'The Arctic Ocean', correct: false }] },
+            ],
+            generalMix: [
+                { question: 'How many sides does a hexagon have?', answers: [{ text: '6', correct: true }, { text: '8', correct: false }] },
+                { question: 'What is the capital of Canada?', answers: [{ text: 'Ottawa', correct: true }, { text: 'Toronto', correct: false }] },
+                { question: 'Who is credited with inventing the World Wide Web?', answers: [{ text: 'Tim Berners-Lee', correct: true }, { text: 'Bill Gates', correct: false }] },
+                { question: 'What is the main ingredient in guacamole?', answers: [{ text: 'Avocado', correct: true }, { text: 'Tomato', correct: false }] },
+                { question: 'How many players are on a standard soccer team on the field at one time?', answers: [{ text: '11', correct: true }, { text: '9', correct: false }] },
+                { question: 'What is the name of the galaxy we live in?', answers: [{ text: 'The Milky Way', correct: true }, { text: 'Andromeda', correct: false }] },
+                { question: 'What is the chemical symbol for table salt?', answers: [{ text: 'NaCl', correct: true }, { text: 'H2O', correct: false }] },
+                { question: 'What company uses the slogan "Just Do It"?', answers: [{ text: 'Nike', correct: true }, { text: 'Adidas', correct: false }] },
+                { question: 'What is the hardest known natural material?', answers: [{ text: 'Diamond', correct: true }, { text: 'Graphene', correct: false }] },
+                { question: 'What is the boiling point of water at sea level?', answers: [{ text: '100°C / 212°F', correct: true }, { text: '90°C / 194°F', correct: false }] },
+                { question: 'What is the process by which plants make food using sunlight?', answers: [{ text: 'Photosynthesis', correct: true }, { text: 'Respiration', correct: false }] },
+                { question: 'What part of a plant absorbs water and nutrients from the soil?', answers: [{ text: 'Roots', correct: true }, { text: 'Leaves', correct: false }] },
+                { question: 'What is the green pigment in plant leaves called?', answers: [{ text: 'Chlorophyll', correct: true }, { text: 'Melanin', correct: false }] },
+                { question: 'Which part of a flower produces pollen?', answers: [{ text: 'The stamen', correct: true }, { text: 'The pistil', correct: false }] },
+                { question: 'What is the woody tissue in trees that transports water?', answers: [{ text: 'Xylem', correct: true }, { text: 'Phloem', correct: false }] },
+                { question: 'Which type of tree loses its leaves in the fall?', answers: [{ text: 'Deciduous', correct: true }, { text: 'Coniferous', correct: false }] },
+                { question: 'What is the sweet liquid produced by flowers to attract pollinators?', answers: [{ text: 'Nectar', correct: true }, { text: 'Sap', correct: false }] },
+                { question: 'From which plant does coffee originate?', answers: [{ text: 'The coffee plant (Coffea)', correct: true }, { text: 'The cacao tree', correct: false }] },
+                { question: 'What is a plant that lives for more than two years called?', answers: [{ text: 'Perennial', correct: true }, { text: 'Annual', correct: false }] },
+                { question: 'What is the study of plants called?', answers: [{ text: 'Botany', correct: true }, { text: 'Zoology', correct: false }] },
+                { question: 'Who painted "The Starry Night"?', answers: [{ text: 'Vincent van Gogh', correct: true }, { text: 'Claude Monet', correct: false }] },
+                { question: 'Who sculpted the statue of "David"?', answers: [{ text: 'Michelangelo', correct: true }, { text: 'Donatello', correct: false }] },
+                { question: 'What art movement is characterized by dream-like, bizarre scenes?', answers: [{ text: 'Surrealism', correct: true }, { text: 'Impressionism', correct: false }] },
+                { question: 'Who is famous for his "Campbell\'s Soup Cans" artwork?', answers: [{ text: 'Andy Warhol', correct: true }, { text: 'Roy Lichtenstein', correct: false }] },
+                { question: 'What is the name of the famous painting by Edvard Munch depicting a horrified figure?', answers: [{ text: 'The Scream', correct: true }, { text: 'The Thinker', correct: false }] },
+                { question: 'Which art movement focused on capturing a momentary impression of a scene?', answers: [{ text: 'Impressionism', correct: true }, { text: 'Cubism', correct: false }] },
+                { question: 'Who painted the ceiling of the Sistine Chapel?', answers: [{ text: 'Michelangelo', correct: true }, { text: 'Leonardo da Vinci', correct: false }] },
+                { question: 'What style of art is Pablo Picasso most associated with?', answers: [{ text: 'Cubism', correct: true }, { text: 'Realism', correct: false }] },
+                { question: 'Which Dutch artist is known for his self-portraits and paintings of common people?', answers: [{ text: 'Rembrandt', correct: true }, { text: 'Vermeer', correct: false }] },
+                { question: 'What is a "fresco"?', answers: [{ text: 'A painting done on wet plaster', correct: true }, { text: 'A sculpture made of bronze', correct: false }] },
+                { question: 'What is the atomic number of Carbon?', answers: [{ text: '6', correct: true }, { text: '12', correct: false }] },
+                { question: 'What force opposes motion between two surfaces in contact?', answers: [{ text: 'Friction', correct: true }, { text: 'Gravity', correct: false }] },
+                { question: 'What is the study of earthquakes called?', answers: [{ text: 'Seismology', correct: true }, { text: 'Meteorology', correct: false }] },
+                { question: 'What is the largest organ in the human body?', answers: [{ text: 'The skin', correct: true }, { text: 'The liver', correct: false }] },
+                { question: 'What type of star is the Sun?', answers: [{ text: 'A Yellow Dwarf', correct: true }, { text: 'A Red Giant', correct: false }] },
+                { question: 'What are the three states of matter?', answers: [{ text: 'Solid, Liquid, Gas', correct: true }, { text: 'Rock, Water, Air', correct: false }] },
+                { question: 'What part of an atom has a positive charge?', answers: [{ text: 'Proton', correct: true }, { text: 'Neutron', correct: false }] },
+                { question: 'How long does it take for Earth to orbit the Sun?', answers: [{ text: 'Approximately 365.25 days', correct: true }, { text: '30 days', correct: false }] },
+                { question: 'What is the scientific name for humans?', answers: [{ text: 'Homo sapiens', correct: true }, { text: 'Neanderthal', correct: false }] },
+                { question: 'What is the closest galaxy to the Milky Way?', answers: [{ text: 'Andromeda Galaxy', correct: true }, { text: 'Triangulum Galaxy', correct: false }] },
+                { question: 'Which organ is responsible for our sense of sight?', answers: [{ text: 'The Eye', correct: true }, { text: 'The Ear', correct: false }] },
+                { question: 'What are the tiny bumps on your tongue that help you taste?', answers: [{ text: 'Papillae', correct: true }, { text: 'Follicles', correct: false }] },
+                { question: 'Which part of the ear helps with balance?', answers: [{ text: 'The inner ear (semicircular canals)', correct: true }, { text: 'The eardrum', correct: false }] },
+                { question: 'The sense of smell is also known as what?', answers: [{ text: 'Olfaction', correct: true }, { text: 'Gustation', correct: false }] },
+                { question: 'What is the colored part of the eye called?', answers: [{ text: 'The Iris', correct: true }, { text: 'The Pupil', correct: false }] },
+                { question: 'What are the three small bones in the middle ear collectively called?', answers: [{ text: 'The Ossicles', correct: true }, { text: 'The Cochlea', correct: false }] },
+                { question: 'What is the largest sense organ?', answers: [{ text: 'The Skin', correct: true }, { text: 'The Nose', correct: false }] },
+                { question: 'Which sense is most closely linked to memory?', answers: [{ text: 'Smell', correct: true }, { text: 'Sight', correct: false }] },
+                { question: 'The retina is part of which sense organ?', answers: [{ text: 'The Eye', correct: true }, { text: 'The Tongue', correct: false }] },
+                { question: 'What are the five basic tastes?', answers: [{ text: 'Sweet, Sour, Salty, Bitter, Umami', correct: true }, { text: 'Spicy, Sweet, Sour, Salty, Bitter', correct: false }] },
+                { question: 'Which is the most populous continent?', answers: [{ text: 'Asia', correct: true }, { text: 'Africa', correct: false }] },
+                { question: 'Which continent is known as the "frozen continent"?', answers: [{ text: 'Antarctica', correct: true }, { text: 'Europe', correct: false }] },
+                { question: 'The Amazon Rainforest is primarily located on which continent?', answers: [{ text: 'South America', correct: true }, { text: 'Africa', correct: false }] },
+                { question: 'Which continent is also a single country?', answers: [{ text: 'Australia', correct: true }, { text: 'North America', correct: false }] },
+                { question: 'Through which two continents does the country of Egypt lie?', answers: [{ text: 'Africa and Asia', correct: true }, { text: 'Africa and Europe', correct: false }] },
+                { question: 'What is the smallest continent by land area?', answers: [{ text: 'Australia', correct: true }, { text: 'South America', correct: false }] },
+                { question: 'The Alps mountain range is found on which continent?', answers: [{ text: 'Europe', correct: true }, { text: 'Asia', correct: false }] },
+                { question: 'Which continent has the most countries?', answers: [{ text: 'Africa', correct: true }, { text: 'Asia', correct: false }] },
+                { question: 'The Sahara Desert is on which continent?', answers: [{ text: 'Africa', correct: true }, { text: 'Australia', correct: false }] },
+                { question: 'Which continent is the only one to lie in all four hemispheres?', answers: [{ text: 'Africa', correct: true }, { text: 'Asia', correct: false }] },
+                { question: 'How many oceans are officially recognized in the world?', answers: [{ text: 'Five', correct: true }, { text: 'Four', correct: false }] },
+                { question: 'What is the deepest point in all of the world\'s oceans?', answers: [{ text: 'The Mariana Trench', correct: true }, { text: 'The Puerto Rico Trench', correct: false }] },
+                { question: 'Which is the smallest ocean?', answers: [{ text: 'The Arctic Ocean', correct: true }, { text: 'The Indian Ocean', correct: false }] },
+                { question: 'Which ocean surrounds Antarctica?', answers: [{ text: 'The Southern Ocean', correct: true }, { text: 'The South Pacific Ocean', correct: false }] },
+                { question: 'The Great Barrier Reef is located in which ocean?', answers: [{ text: 'The Pacific Ocean', correct: true }, { text: 'The Indian Ocean', correct: false }] },
+                { question: 'Which ocean separates Europe and Africa from the Americas?', answers: [{ text: 'The Atlantic Ocean', correct: true }, { text: 'The Pacific Ocean', correct: false }] },
+                { question: 'The term "Ring of Fire" is associated with which ocean?', answers: [{ text: 'The Pacific Ocean', correct: true }, { text: 'The Atlantic Ocean', correct: false }] },
+                { question: 'What is the warmest ocean in the world?', answers: [{ text: 'The Indian Ocean', correct: true }, { text: 'The Atlantic Ocean', correct: false }] },
+                { question: 'The Bermuda Triangle is located in which ocean?', answers: [{ text: 'The Atlantic Ocean', correct: true }, { text: 'The Pacific Ocean', correct: false }] },
+                { question: 'Which is the youngest of the world\'s oceans?', answers: [{ text: 'The Southern Ocean', correct: true }, { text: 'The Arctic Ocean', correct: false }] },
+            ],
+                 
+            
+
+            }
+            
+        
+        
+        // --- SCREEN & NOTIFICATION LOGIC ---
+        function switchScreen(toScreen) { allScreens.forEach(screen => screen.classList.add('hide')); toScreen.classList.remove('hide'); }
+        function sendWhatsAppNotification(username) {
+            const yourPhoneNumber = '15551234567'; // !!! REPLACE WITH YOUR NUMBER
+            if (!yourPhoneNumber || yourPhoneNumber === '2347049111844') { console.warn("WhatsApp number not set. Skipping notification."); return; }
+            const message = `Hello! Player ${username} has started a session on the Educational Quiz Hub! 🧠`;
+            const whatsappURL = `https://wa.me/${yourPhoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappURL, '_blank');
+        }
+
+        // --- EVENT LISTENERS ---
+        gotoLoginBtn.addEventListener('click', () => switchScreen(loginPage));
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); const username = usernameInput.value.trim();
+            if (username) { sendWhatsAppNotification(username); welcomeGreeting.textContent = `Welcome, ${username}!`; switchScreen(welcomeScreen); }
+        });
+        enterQuizBtn.addEventListener('click', () => switchScreen(categorySelectionContainer));
+        backButton.addEventListener('click', () => { clearInterval(timerInterval); switchScreen(categorySelectionContainer); });
+        playAgainButton.addEventListener('click', () => switchScreen(categorySelectionContainer));
+        document.querySelectorAll('.category-btn').forEach(button => { button.addEventListener('click', () => startGame(button.dataset.category)); });
+        subscribeButton.addEventListener('click', () => {
+            alert('Thank you for subscribing! All premium categories are now unlocked!');
+            document.querySelectorAll('.premium-category').forEach(btn => btn.classList.remove('hide'));
+            subscribeButton.classList.add('hide');
+        });
+
+        // --- GAME LOGIC ---
+        function startGame(category) { score = 0; currentQuestionIndex = 0; currentQuestions = allQuestions[category].sort(() => Math.random() - 0.5); switchScreen(questionContainerElement); setNextQuestion(); }
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < currentQuestions.length) { updateProgress(); showQuestion(currentQuestions[currentQuestionIndex]); startTimer(); } else { showResults(); }
+        }
+        function updateProgress() { questionCounterText.innerText = `Question ${currentQuestionIndex + 1} / ${currentQuestions.length}`; progressBar.style.width = `${((currentQuestionIndex + 1) / currentQuestions.length) * 100}%`; }
+        function startTimer() {
+            let timeLeft = 15; timerElement.innerText = timeLeft; timerElement.style.backgroundColor = '#4e54c8';
+            timerInterval = setInterval(() => { timeLeft--; timerElement.innerText = timeLeft; if (timeLeft <= 5) timerElement.style.backgroundColor = '#e73c7e'; if (timeLeft <= 0) { clearInterval(timerInterval); selectAnswer({ target: null }); } }, 1000);
+        }
+        function showQuestion(question) {
+            questionElement.innerText = question.question;
+            question.answers.forEach(answer => { const button = document.createElement('button'); button.innerText = answer.text; button.classList.add('btn'); if (answer.correct) button.dataset.correct = answer.correct; button.addEventListener('click', selectAnswer, { once: true }); answerButtonsElement.appendChild(button); });
+        }
+        function selectAnswer(e) {
+            clearInterval(timerInterval); const selectedButton = e.target; const isCorrect = selectedButton && selectedButton.dataset.correct === "true";
+            if (isCorrect) { const timeLeft = parseInt(timerElement.innerText); score += 100 + (timeLeft * 10); selectedButton.classList.add('correct'); correctSound.play().catch(e => {}); } else { if(selectedButton) selectedButton.classList.add('wrong'); wrongSound.play().catch(e => {}); }
+            Array.from(answerButtonsElement.children).forEach(button => { if (button.dataset.correct === "true") button.classList.add('correct'); button.disabled = true; });
+            currentQuestionIndex++; setTimeout(setNextQuestion, 1500);
+        }
+        function showResults() {
+            const highScore = localStorage.getItem('quizHighScore') || 0;
+            if (score > highScore) { localStorage.setItem('quizHighScore', score); highScoreText.innerText = `NEW HIGH SCORE: ${score}`; } else { highScoreText.innerText = `High Score: ${highScore}`; }
+            scoreText.innerText = `Your Score: ${score}`; encouragementMessage.innerText = getEncouragement(score, currentQuestions.length * 150); switchScreen(resultsContainer);
+        }
+        function resetState() { while (answerButtonsElement.firstChild) { answerButtonsElement.removeChild(answerButtonsElement.firstChild); } }
+        function getEncouragement(score, totalPotential) {
+            const percentage = (score / totalPotential) * 100;
+            if (percentage >= 90) return "Incredible! You're a trivia legend!"; if (percentage >= 70) return "Amazing score! You are a true expert!"; if (percentage >= 50) return "Great job! You really know your stuff!"; return "Thanks for playing! Every round makes you sharper!";
+        }
+    </script>
+</body>
+</html>
