@@ -402,7 +402,7 @@
         function switchScreen(toScreen) { allScreens.forEach(screen => screen.classList.add('hide')); toScreen.classList.remove('hide'); }
         function sendWhatsAppNotification(username) {
             const yourPhoneNumber = '2347049111844'; // !!! REPLACE WITH YOUR NUMBER
-            if (!yourPhoneNumber || yourPhoneNumber === '2347049111844') { console.warn("WhatsApp number not set. Skipping notification."); return; }
+            if (!yourPhoneNumber || yourPhoneNumber === '555123456') { console.warn("WhatsApp number not set. Skipping notification."); return; }
             const message = `Hello! Player ${username} has started a session on the Educational Quiz Hub! 🧠`;
             const whatsappURL = `https://wa.me/${yourPhoneNumber}?text=${encodeURIComponent(message)}`;
             window.open(whatsappURL, '_blank');
